@@ -86,3 +86,29 @@ END main
 
 
 **3.10 Programming Exercises**
+
+1. Integer Expression Calculation
+
+• 핵심: ADD EAX, EBX → ADD ECX, EDX → SUB EAX, ECX 순서로 계산합니다.
+
+2. Symbolic Integer Constants
+
+• 핵심:.CONST 섹션에서 SUN = 0 와 같이 상수를 정의하고,. DATA 섹션에서 weekArray DWORD SUN, MON, ... 와 같이 배열을 초기화합니다.
+
+3. Data Definitions
+
+• 핵심: Table 3-2의 모든 타입을 .DATA 에 정의하고 적절한 값으로 초기화합니다. (예: varSDWORD SDWORD -100, varREAL4 REAL4 1.23 ).
+
+4. Symbolic Text Constants
+• 핵심: .CONST 섹션에서 MSG_HELLO EQU <"Hello"> 와 같이 문자열 리터럴 상수를 정의하고, .DATA 에서 helloString BYTE MSG_HELLO, 0 와 같이 사용합니다.
+
+5. Listing File for AddTwoSum
+
+• 핵심: AddTwoSum 코드를 어셈블러로 컴파일하여 .1st 파일을 생성한 후, 파일 내의 각 명령어에 해당하는 16진수 바이트 코드를 Opcode, 피연산자 등으로 분석합니다.
+
+6. AddVariables Program
+
+• 핵심: DWORD → QWORD 및 EAX → RAX 로 변경.
+
+• 오류/해결: 32비트 환경에서 64비트 레지스터 사용 시 오류가 발생하며, 64비트 어셈블러 환경을
+사용하도록 변경하여 해결해야 합니다.
