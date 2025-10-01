@@ -1,5 +1,5 @@
 
-3.9.1 Short Answer (단답형 및 설명형)
+**3.9.1 Short Answer (단답형 및 설명형)**
 
 1. MOV, ADD, JMP
 2. 호출 규약은 함수 호출 시 인자 전달, 스택 정리, 레지스터 보존에 대한 규칙이며, 어셈블리에서는
@@ -40,3 +40,38 @@ PROTO 지시어 사용 시 적용됩니다.
 27. QWORD
 28. BYTE
 29. TBYTE
+
+
+**3.9.2 Algorithm Workbench (알고리즘 작업대)**
+1. VAL_DEC = 25
+VAL_BIN = 11001b
+VAL_OCT = 31o
+VAL_HEX = 19h
+2. 가능합니다. 프로그램은 여러 코드 및 데이터 세그먼트를 가질 수 있습니다.
+3. myBigEndian DB 12h, 34h, 56h, 78h ; (예시: 12345678h 저장 시)
+4. 할 수 있습니다. 어셈블러는 음수를 2의 보수로 저장하며, 이는 어셈블러가 강력한 타입 검사를 하지 않음을 의미합니다.
+5. .CODE
+main PROC
+    ADD EAX, 5   ; 명령어 1
+    ADD EDX, 5   ; 명령어 2
+main ENDP
+END main
+차이점: 두 명령어 모두 3바이트 길이지만, 두 번째 바이트(C0 대 C2)가 다릅니다.
+이유: 83h는 **'정수를 레지스터/메모리에 더하라'**는 Opcode(명령 코드)이고, 세 번째 바이트 05h는 더할 값(5)입니다. 중간 바이트(C0 또는 C2)는 ModR/M 바이트로, 어떤 레지스터(EAX 또는 EDX)에 연산을 수행할지 지정하는 코드입니다. 즉, 명령어 자체는 같지만, 대상 레지스터가 다르기 때문에 기계어 코드가 달라집니다.
+6. ABh, 89h, 67h, 45h
+7.
+  .DATA? ; 초기화되지 않은 데이터 세그먼트
+  dArray DW 120 DUP(?)
+8.
+.DATA
+  charArray BYTE 'a', 'b', 'c', 'd', 'e'
+9.minVal SDWORD -2147483648
+10.wArray WORD 10, 20, 30
+11. favColor BYTE "Blue", 0
+12. dArray SDWORD 50 DUP(?)
+13. myString BYTE 500 DUP("TEST")
+14. bArray BYTE 20 DUP(0)
+15. Lowest Address: 21h, Next: 43h, Next: 65h, Highest Address: 87h
+
+
+**3.10 Programming Exercises**
