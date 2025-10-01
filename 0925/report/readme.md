@@ -44,18 +44,18 @@ PROTO 지시어 사용 시 적용됩니다.
 
 **3.9.2 Algorithm Workbench (알고리즘 작업대)**
 1. VAL_DEC = 25
-VAL_BIN = 11001b
-VAL_OCT = 31o
-VAL_HEX = 19h
+   VAL_BIN = 11001b
+   VAL_OCT = 31o
+   VAL_HEX = 19h
 
-2. 가능합니다. 프로그램은 여러 코드 및 데이터 세그먼트를 가질 수 있습니다.
-3. myBigEndian DB 12h, 34h, 56h, 78h ; (예시: 12345678h 저장 시)
-4. 할 수 있습니다. 어셈블러는 음수를 2의 보수로 저장하며, 이는 어셈블러가 강력한 타입 검사를 하지 않음을 의미합니다.
+3. 가능합니다. 프로그램은 여러 코드 및 데이터 세그먼트를 가질 수 있습니다.
+4. myBigEndian DB 12h, 34h, 56h, 78h ; (예시: 12345678h 저장 시)
+5. 할 수 있습니다. 어셈블러는 음수를 2의 보수로 저장하며, 이는 어셈블러가 강력한 타입 검사를 하지 않음을 의미합니다.
 
-5. .CODE
+6. .CODE
 main PROC
-    ADD EAX, 5   ; 명령어 1
-    ADD EDX, 5   ; 명령어 2
+ADD EAX, 5   ; 명령어 1
+ADD EDX, 5   ; 명령어 2
 main ENDP
 END main
 
