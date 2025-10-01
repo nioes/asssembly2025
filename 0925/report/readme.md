@@ -59,18 +59,23 @@ END main
 차이점: 두 명령어 모두 3바이트 길이지만, 두 번째 바이트(C0 대 C2)가 다릅니다.
 이유: 83h는 **'정수를 레지스터/메모리에 더하라'**는 Opcode(명령 코드)이고, 세 번째 바이트 05h는 더할 값(5)입니다. 중간 바이트(C0 또는 C2)는 ModR/M 바이트로, 어떤 레지스터(EAX 또는 EDX)에 연산을 수행할지 지정하는 코드입니다. 즉, 명령어 자체는 같지만, 대상 레지스터가 다르기 때문에 기계어 코드가 달라집니다.
 6. ABh, 89h, 67h, 45h
-7.
-  .DATA? ; 초기화되지 않은 데이터 세그먼트
+7..DATA? ; 초기화되지 않은 데이터 세그먼트
   dArray DW 120 DUP(?)
-8.
-.DATA
+8..DATA
   charArray BYTE 'a', 'b', 'c', 'd', 'e'
+
 9.minVal SDWORD -2147483648
+
 10.wArray WORD 10, 20, 30
+   
 11. favColor BYTE "Blue", 0
+
 12. dArray SDWORD 50 DUP(?)
+
 13. myString BYTE 500 DUP("TEST")
+
 14. bArray BYTE 20 DUP(0)
+
 15. Lowest Address: 21h, Next: 43h, Next: 65h, Highest Address: 87h
 
 
