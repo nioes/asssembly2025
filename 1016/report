@@ -1,1 +1,168 @@
+4.9 Review Questions and Exercises
+4.9.1 Short Answer 
 
+1. (a) EDX = 0FFFF8002h (one = 8002h → sign-extended)
+2. (b) EDX = 00004321h (two = 4321h → sign-extended)
+
+3. EAX = 10020000h (AX = FFFF → INC AX → 0000 → EAX low becomes 0000)
+
+4. EAX = 3002FFFFh (AX = 0000 → DEC AX → FFFF)
+
+5. EAX = 10020001h (AX = FFFF → NEG AX → 0001)
+
+6. Parity flag = 0 (AL=4 → 비트 1개 → 홀수 → PF 클리어)
+
+7. EAX = FFFFFFFFh (결과 -1), Sign flag = 1 (음수)
+결과: AL = 81h (0xFF + 0x82 = 0x81), Overflow flag = 0.
+설명: immediate 130(0x82)는 부호있는 값으로 보면 -126이므로 OF는 설정되지 않음.
+
+8. RAX = 0000000044445555h (64-bit 레지스터에 값 그대로)
+
+9. RAX = 0000000084326732h (mov rax,dwordVal은 32→64 비트를 제로-익스텐드)
+
+10. EAX = 00035678h
+(dVal=12345678h, mov WORD PTR dVal+2,ax 에서 AX=0003 → high word=0003 → dword=00035678h)
+
+11. EAX = 12341237h
+(mov ax,WORD PTR dVal+2 → AX=1234h; add ax,3 → AX=1237h; mov WORD PTR dVal,ax → low word=1237h)
+
+12. (Yes/No) 아니오. 양수 + 음수는 부호오버플로를 만들 수 없다.
+
+13. (Yes/No) 예. 음수 + 음수에서 양수 결과가 나오면 OF 셋.
+
+14. (Yes/No) 예. NEG는 최솟값(예: 0x80(8-bit), 0x8000(16-bit))을 부호반전하면 OF가 셋된다.
+
+15. (Yes/No) 아니오. ZF=1이면 결과가 0이고 SF는 0이다 → 동시에 1일 수 없음.
+
+16. 유효성:
+a. mov ax,var1 — 무효 (var1은 BYTE 배열)
+b. mov ax,var2 — 유효 (var2는 WORD)
+c. mov eax,var3 — 무효 (var3는 16비트, 크기 불일치)
+d. mov var2,var3 — 무효 (메모리→메모리)
+e. movzx ax,var2 — 무효 (대상 크기가 소스보다 작거나 같으면 안 됨)
+f. movzx var2,al — 무효 (movzx 대상은 레지스터)
+g. mov ds,ax — 유효(문법상 가능)
+h. mov ds,1000h — 무효 (즉시값을 세그먼트 레지에 바로 못 넣음)
+
+17. a. AL = FCh (var1[0] = -4 → 0FCh)
+b. AH = 01h (var1[3] = 1)
+→ AX = 01FCh
+
+18. a. AX = 1000h
+b. AX = 3000h (var2+4 → 세 번째 WORD)
+c. AX = FFF0h (var3 = -16 → FFF0h)
+d. AX = 4000h (var3-2 → var2의 4번째 WORD)
+
+19. a. EDX = 00000001h (var4[0])
+b. EDX = 00001000h (movzx edx,var2 → zero-extend word 1000h)
+c. EDX = 00000002h (var4+4 → 두 번째 DWORD = 2)
+d. EDX = FFFFFFFCh (movsx edx,var1 → sign-extend byte -4 → FFFFFFFCh)
+
+4.9.2 Algorithm Workbench
+
+1.doubleword three의 상하 16비트 교환 (MOV만 사용)
+mov ax, WORD PTR three
+mov dx, WORD PTR three+2
+mov WORD PTR three, dx
+mov WORD PTR three+2, ax
+
+2.레지스터 A,B,C,D → B,C,D,A (XCHG ≤3번)
+xchg a,b
+xchg b,c
+xchg c,d
+
+3.AL의 패리티 검사 (예: AL=01110101b)
+add al,0    ; 플래그 갱신
+jp  even    ; PF=1 이면 even parity (jp/jpo 사용)
+
+4.byte 연산으로 음수+음수 → OF set 예시
+mov al,080h
+add al,080h   ; 0x80 + 0x80 → 0x00, OF=1
+
+5.두 연산으로 Zero & Carry 함께 세트 예시
+mov al,0FFh
+add al,1     ; 결과 00h → ZF=1, CF=1
+
+6.두 연산으로 subtraction으로 Carry 설정
+mov al,0
+sub al,1     ; underflow → CF=1
+
+7.EAX = -val2 + 7 - val3 + val1 (가독성 있게)
+mov eax, val1
+sub eax, val3
+sub eax, val2
+add eax, 7
+
+8. doubleword 배열 합계 (scale & indexed addressing) — 개요
+mov ecx, COUNT        ; 개수
+xor rax,rax           ; 합계
+xor rsi,rsi           ; 인덱스 0
+loop_start:
+  add rax, [array + rsi*8]  ; doubleword = 8바이트
+  inc rsi
+  loop loop_start
+
+9.AX = (val2 + BX) - val4 (val2,val4 16-bit)
+mov ax, val2
+add ax, bx
+sub ax, val4
+
+10. 두 명령으로 CF와 OF 동시에 세트
+
+11.INC/DEC로 unsigned overflow 감지
+
+12.myBytes를 짝수 주소로 정렬하려면: EVEN (또는 사용 어셈블러에 따라 ALIGN 2) 삽입.
+
+13. 
+TYPE myBytes = 1
+LENGTHOF myBytes = 4
+SIZEOF myBytes = 4
+TYPE myWords = 2
+LENGTHOF myWords = 4 (3 DUP + 1)
+SIZEOF myWords = 8
+SIZEOF myString = 5 ("ABCDE"의 길이)
+
+14. mov dx, WORD PTR myBytes
+
+15. mov al, BYTE PTR myWords+1
+
+16. mov eax, DWORD PTR myBytes
+
+17. myWords LABEL DWORD; (그 후 필요하면 DWORD PTR로 접근)
+
+18.myBytes LABEL WORD
+
+
+4.10 Programming Exercises
+1.Big Endian → Little Endian (32-bit 값 12 34 56 78h)
+mov eax, DWORD PTR bigEndian
+bswap eax
+mov DWORD PTR littleEndian, eax
+
+2. 짝수 길이 배열에서 인접 쌍 교환
+for i = 0 to N-1 step 2
+  swap array[i], array[i+1]
+
+3. 배열 바이트 패리티 검사 + Parity flag 사용
+
+4. Word→DoubleWord 복사
+mov ecx, count
+xor rsi,rsi
+copy_loop:
+  mov ax, [wordArray + rsi*2]
+  movzx eax, ax
+  mov [dwordArray + rsi*4], eax
+  inc rsi
+  loop copy_loop
+
+5. Fibonacci 첫 7개 (루프)
+초기화 F1=1 F2=1 반복해서 다음 값 계산하고 저장
+
+6. 배열 제자리(reverse, 루프)
+양쪽 끝 포인터로 교환: while (i<j) swap [a+i], [a+j]; i++; j--;
+
+7. 문자열 역복사 (source → target)
+포인터로 문자열 끝 찾고 역방향으로 복사 (NULL 포함 또는 기준에 따라)
+
+8. 배열 원소 1칸 앞으로 회전 (wrap)
+임시에 첫값 보관 → 모든 요소를 i←i+1로 이동 → 마지막에 첫값 넣기.
