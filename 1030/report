@@ -1,1 +1,252 @@
+5.8 Review Questions and Exercises
+5.8.1 Short Answer
+
+1.PUSHAD 를 사용합니다.
+2.PUSHF 또는 PUSHFD 를 사용합니다.
+3.POPF 또는 POPFD 를 사용합니다.
+4. 선택적으로 레지스터를 저장하여 스택 공간을 절약하고, 불필요한 복원 작업을 생략할 수 있습니다.
+5.SUB ESP, 4 와 MOV [ESP], EAX 를 사용합니다.
+6. True입니다.
+7. False입니다.
+8. True입니다.
+9. False입니다.
+10. True입니다.
+11. False입니다.
+12. False입니다.
+13. False입니다. (MASM에서는 일반적으로 공백을 사용합니다.)
+14. 배열 요소를 읽는 크기 지시자를 DWORD 에서 ** WORD ** 로 변경하고, 포인터(ESI) 증가분을 4 에서** 2 ** 로 변경해야 합니다.
+15. EAX = 5입니다.
+16. c. EAX will equal 20 on line 6입니다.
+17. a. EAX will equal 30 on line 6입니다.
+18. a. EAX will equal 30 on line 7입니다.
+19. EAX는 40이고 EDX는 리턴 주소 값입니다. (선택지 중 정확한 답은 없지만, 코드상 오류 없이 실행되며 EAX는 40이 됩니다.)
+20. 배열에 기록될 값은 순서대로 10, 20, 30, 40입니다.
+
+5.9 Programming Exercises
+1.
+.data
+myStr BYTE "HELLO", 0
+.code
+main PROC
+    MOV ECX, 4        ; 4가지 색상 반복
+L1:
+    MOV EAX, ECX      ; 색상 값(4, 3, 2, 1) 로드
+    INVOKE SetTextColor, EAX ; 색상 설정
+    INVOKE WriteString, OFFSET myStr
+    INVOKE Crlf
+    LOOP L1
+    INVOKE ExitProcess, 0
+main ENDP
+
+2.
+.data
+chars BYTE 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 0
+links BYTE 0, 1, 2, 3, 4, 5, 6, 7 ; 예시 링크 배열
+newArr BYTE 8 DUP(0)
+.code
+main PROC
+    MOV ESI, OFFSET links ; links 배열 포인터
+    MOV EDI, OFFSET newArr  ; newArr 배열 포인터
+    MOV ECX, 8 ; 8번 반복
+L1:
+    MOV AL, [ESI]     ; links[i] 값(문자 인덱스) 로드
+    MOV BL, chars[EAX] ; chars[인덱스] 문자 로드 (EAX를 인덱스로 사용)
+    MOV [EDI], BL     ; newArr에 복사
+    INC ESI
+    INC EDI
+    LOOP L1
+    INVOKE ExitProcess, 0
+main ENDP
+
+3.
+.code
+main PROC
+    INVOKE Clrscr
+    INVOKE GoToXY, 10, 5 ; 커서 중앙 근처로 이동
+    
+    INVOKE ReadInt     ; 첫 번째 정수 입력 -> EAX
+    PUSH EAX           ; EAX 값 저장
+    
+    INVOKE ReadInt     ; 두 번째 정수 입력 -> EAX
+    POP EBX            ; 첫 번째 값 복원 -> EBX
+    ADD EAX, EBX       ; 합산
+    
+    INVOKE GoToXY, 10, 7
+    INVOKE WriteInt, EAX ; 결과 출력
+    INVOKE ExitProcess, 0
+main ENDP
+
+4.
+.code
+main PROC
+    MOV ECX, 3 ; 3회 반복
+L1:
+    INVOKE Clrscr ; 매번 화면 초기화
+    
+    INVOKE ReadInt ; 1st
+    PUSH EAX
+    INVOKE ReadInt ; 2nd
+    POP EBX
+    ADD EAX, EBX
+    
+    INVOKE WriteInt, EAX
+    INVOKE Crlf
+    INVOKE Delay, 2000 ; 결과를 확인할 시간
+    LOOP L1
+    
+    INVOKE ExitProcess, 0
+main ENDP
+
+5.
+; EAX = N (상한), EBX = M (하한)
+BetterRandomRange PROC USES EAX EBX
+    SUB EAX, EBX         ; EAX = N - M (범위 크기)
+    INVOKE RandomRange, EAX ; 0 <= EAX < (N-M)
+    ADD EAX, EBX         ; EAX = EAX + M (최종 결과 M <= EAX < N)
+    RET
+BetterRandomRange ENDP
+
+6.
+.data
+randStr BYTE 50 DUP(0)
+.code
+; EDI에 포인터, ECX에 길이(L)가 있다고 가정
+RandomString PROC USES EAX
+L1:
+    INVOKE RandomRange, 26 ; 0 <= EAX < 26
+    ADD AL, 'A'          ; 'A' ~ 'Z' 문자 생성
+    MOV [EDI], AL        ; 문자 저장
+    INC EDI
+    LOOP L1
+    MOV BYTE PTR [EDI], 0 ; Null 종료
+    RET
+RandomString ENDP
+
+7.
+.data
+charToDisp BYTE '*',0
+.code
+main PROC
+    MOV ECX, 100 ; 100회 반복
+    INVOKE GetMaxXY  ; EAX=Ymax, EBX=Xmax
+    
+L1:
+    PUSH EAX ; Ymax 저장
+    INVOKE RandomRange, EBX ; X축 랜덤 (0..Xmax-1) -> EAX
+    PUSH EAX ; RandX 저장
+    
+    POP EAX ; Ymax 복원
+    INVOKE RandomRange, EAX ; Y축 랜덤 (0..Ymax-1) -> EAX
+    
+    POP EBX ; RandX 복원
+    ; EAX = RandY, EBX = RandX
+    
+    INVOKE GoToXY, EBX, EAX ; GoToXY(X, Y)
+    INVOKE WriteString, OFFSET charToDisp
+    INVOKE Delay, 100
+    
+    MOV EAX, [ESP+4] ; Ymax 재로드
+    MOV EBX, [ESP]   ; Xmax 재로드
+    
+    LOOP L1
+    INVOKE ExitProcess, 0
+main ENDP
+
+8.
+.code
+main PROC
+    MOV EBP, 0 ; EBP = 배경색 (0 to 15)
+L_BG:
+    PUSH EBP ; 배경색 EBP 저장
+    MOV ECX, 16 ; ECX = 전경색 (0 to 15)
+L_FG:
+    MOV EAX, [ESP] ; EAX = 현재 배경색 (EBP)
+    SHL EAX, 4     ; 배경색을 상위 4비트로 이동
+    ADD EAX, ECX   ; 전경색 (ECX)을 하위 4비트에 추가
+    INVOKE SetTextColor, EAX ; 색상 설정
+    INVOKE WriteChar, 'C'
+    LOOP L_FG
+    
+    POP EBP ; 배경색 복원
+    INC EBP
+    INVOKE Crlf
+    CMP EBP, 16
+    JL L_BG
+    
+    INVOKE ExitProcess, 0
+main ENDP
+
+9.
+RecursiveProc PROC
+    PUSH ECX
+    CMP ECX, 0
+    JE L_End
+    
+    INVOKE WriteString, OFFSET message ; 재귀 호출 표시
+    INVOKE Crlf
+    
+    DEC ECX ; ECX를 1 감소 (LOOP 대신)
+    CALL RecursiveProc ; 재귀 호출
+    
+L_End:
+    POP ECX
+    RET
+RecursiveProc ENDP
+
+.data
+message BYTE "Recursive Call!",0
+.code
+main PROC
+    MOV ECX, 5 ; 최대 5회 재귀
+    CALL RecursiveProc
+    INVOKE ExitProcess, 0
+main ENDP
+
+10.
+; EDI = 배열 포인터, ECX = N (항의 개수)
+FibonacciProc PROC USES EAX EBX EDX
+    MOV EAX, 1 ; prev1 = 1
+    MOV EBX, 1 ; prev2 = 1
+    MOV EDX, 0 ; 카운터
+
+L_Gen:
+    CMP EDX, 2
+    JGE L_Calc
+    MOV [EDI], 1 ; 0번째, 1번째 항은 1
+    JMP L_Next
+    
+L_Calc:
+    MOV EAX, [EDI-4] ; 이전 항 (prev1) 로드
+    MOV EBX, [EDI-8] ; 전전 항 (prev2) 로드
+    ADD EAX, EBX     ; EAX = prev1 + prev2
+    MOV [EDI], EAX   ; 새 항 저장
+    
+L_Next:
+    ADD EDI, 4 ; 포인터 증가
+    INC EDX
+    LOOP L_Gen
+    
+    RET
+FibonacciProc ENDP
+
+11.
+; ESI = 배열 포인터, ECX = 배열 크기, EBX = K
+FindMultiples PROC USES EAX EDX
+L1:
+    MOV EAX, 0
+    MOV AL, [ESI]    ; 현재 바이트 값 로드 (0-255)
+    MOV EDX, 0       ; IDIV를 위해 EDX를 0으로 설정
+    
+    IDIV EBX         ; EAX = 몫, EDX = 나머지 (K는 EBX)
+    
+    CMP EDX, 0       ; 나머지가 0인지 확인
+    JNE L_Skip
+    
+    MOV BYTE PTR [ESI], 1 ; 배수이면 1로 설정
+    
+L_Skip:
+    INC ESI
+    LOOP L1
+    RET
+FindMultiples ENDP
 
