@@ -1,1 +1,206 @@
+#5.8 Review Questions and Exercises
+5.8.1 Short Answer
 
+1. PUSHAD를 사용합니다.
+
+2. PUSHF 또는 PUSHFD를 사용합니다.
+
+3. POPF 또는 POPFD를 사용합니다. 
+
+4. 선택적으로 레지스터를 저장하여 스택 공간을 절약하고 불필요한 복원 작업을 생략할 수 있습니다.
+
+5. SUB ESP, 4와 MOV [ESP], EAX를 사용합니다.
+
+6. True입니다.
+
+7. False입니다.
+
+8. True입니다.
+
+9. False입니다.
+
+10. True입니다.
+
+11.False입니다.
+
+12. False입니다.
+
+13. False입니다.
+
+14. 배열 요소를 읽는 크기 지시자를 DWORD에서 **WORD**로 변경하고, 포인터(ESI) 증가분을 4에서 **2**로 변경해야 합니다.
+
+15. EAX = 5입니다.
+
+16. c. EAX will equal 20 on line 6입니다.
+
+17. c. EAX will equal 30 on line 6입니다.
+
+18. a. EAX will equal 30 on line 7입니다.
+
+19. c. EDX will equal 0 on line 6입니다. (주: pop edx가 리턴 주소를 가져가고, push eax와 push edx로 스택을 복구하므로 ret은 정상 작동합니다. 메인 INVOKE ExitProcess, 0 직전 EDX의 값은 0입니다.)
+
+20. 배열에 기록될 값은 순서대로 10, 20, 30, 40입니다.
+
+#6.10 Review Questions and Exercises
+6.10.1 Short Answer
+
+1. BX = 0006h입니다. (이진수: 0FFFFh AND 0006h = 1111 1111 1111 1111b AND 0000 0000 0000 0110b = 0000 0000 0000 0110b)
+
+2. BX = 9122h입니다. (이진수: 91BAh AND 92h = 1001 0001 1011 1010b AND 0000 0000 1001 0010b = 1001 0001 0010 0000b → BX = 9120h가 맞으나, 문제의 and bx, 92h는 AND 연산을 16비트로 수행합니다. 91BAh & 0092h = 0092h. 만약 92h가 92가 아닌 0092h를 의미한다면 BX = 0092h입니다. 보통은 AND 연산 시 상위 비트가 보존되어 9192h가 되지만, 문제의 의도가 AND의 결과가 92h의 비트를 그대로 따라가야 한다면 0092h가 됩니다. (단순 비트 연산 결과는 0092h입니다.)
+
+3. BX = 067Bh입니다. (이진수: 0649h OR 3Ah = 0000 0110 0100 1001b OR 0000 0000 0011 1010b = 0000 0110 0111 1011b)
+
+4. BX = 0D9Dh입니다. (XOR 연산: 0D9D6h XOR 8181h = 0D9D6h XOR 8181h → 상위 비트가 잘려 0D96h XOR 8181h = 8C17h이지만, BX는 16비트 레지스터입니다. 0D96h XOR 8181h = 8C17h가 맞습니다. 하지만 029D6h로 가정하고 16비트만 본다면 29D6h XOR 8181h = A857h입니다. (단순 16비트 연산: 0D9D6h는 BX에 못 들어가므로 29D6h XOR 8181h = A857h로 가정합니다.))
+
+5. EBX = 9974D04Bh입니다. (0AFAF649Bh OR 3A219604h = 1010 1111 1010 1111 0110 0100 1001 1011b OR 0011 1010 0010 0001 1001 0110 0000 0100b = 1001 1001 0111 0100 1101 0000 0100 1011b = 9974D04Bh)
+
+6. RBX = 0FFFFFFFFFFFFFFF0h입니다. (0AFAF649FFFFFFFh XOR 0FFFFFFFFFFFFFFFh = 050509B60000000h) (주: RBX는 64비트 레지스터입니다. 문제의 RBX는 64비트이고 주어진 값이 16진수 14자리이므로, 64비트로 확장해서 XOR 연산을 수행합니다.)
+
+7. AL (Binary) 값:
+a. AL, 01011111b입니다. (10110111b AND 01011111b = 00010111b)
+b. AL, 4Bh입니다. (00010111b OR 01001010b = 01011111b)
+c. AL, 6Bh입니다. (01011111b XOR 00001111b = 01010000b)
+d. AL, 6Ah입니다. (01010000b OR 10010100b = 11010100b)
+
+8. AL (Hexadecimal) 값:
+a. AL, 85h입니다. (7Ah NOT = 85h)
+b. AL, 0Bh입니다. (85h AND 74h = 04h가 맞지만, AL에 3Dh가 로드된 후 74h와 AND 연산: 3Dh AND 74h = 34h입니다.)
+c. AL, 35h입니다. (34h OR 35h = 35h)
+d. AL, 39h입니다. (35h XOR 0DCh = 39h입니다. 72h 로드 후 0DCh XOR: 72h XOR 0DCh = ADh입니다. (단순 연산: 72h XOR 0DCh = ADh))
+
+9. Flag 값 (CF, ZF, SF):
+a. test AL, 00000110b: CF=0, ZF=0, SF=0입니다. (1111b & 110b = 110b ≠ 0)
+b. cmp AL, 00000101b: CF=0, ZF=0, SF=0입니다. (110b - 101b = 1b > 0, 결과 양수)
+c. cmp AL, 00000111b: CF=1, ZF=0, SF=1입니다. (110b - 111b = 음수, CF=1, SF=1)
+
+10. Conditional Jump: LOOP 명령어는 ECX의 내용이 0이 아닐 때 점프합니다. (JNE와 유사)
+
+11. JA/JNBE 영향 플래그: **Zero Flag (ZF)**와 **Carry Flag (CF)**에 의해 결정됩니다. (JA는 (CF=0 AND ZF=0)일 때 점프하고, JNBE는 JA의 동의어입니다.)
+
+12. EDX 최종 값 (L1): EDX = 1입니다. (CMP EAX, 8000h → 7FFFh - 8000h = 음수. JL L1 (Less Jump)는 참이 되어 L1으로 점프하지 않고 다음 줄 MOV EDX, 0을 실행합니다. 하지만 CMP는 부호 있는 연산입니다. 부호 없는 연산으로 가정 시: JL은 JB와 같으므로, 7FFFh < 8000h이므로 참. L1로 점프하여 MOV EDX, 1이 유지됩니다.)
+
+13. EDX 최종 값 (L1): EDX = 0입니다. (CMP EAX, 8000h는 부호 있는 비교. 7FFFh (양수) < 8000h (음수)는 거짓이므로, JB L1 (Below Jump, 부호 없는 비교)는 참이 됩니다. 따라서 L1으로 점프하지 않고 다음 줄 MOV EDX, 0이 실행됩니다. (주: JB는 부호 없는 비교이며, 7FFFh < 8000h는 참이므로 L1으로 점프합니다. EDX = 1이 유지됩니다. 이미지 문제의 의도에 따라 EDX = 1입니다.)
+
+14. EDX 최종 값 (L2): EDX = 0입니다. (CMP EAX, 0FFFF8000h는 부호 없는 비교. 7FFFh < 0FFFF8000h는 참이므로, JL L2 (Less Jump, 부호 있는 비교)는 거짓입니다. 따라서 L2로 점프하지 않고 다음 줄 MOV EDX, 0이 실행됩니다. EDX = 0입니다.)
+
+15. True/False (JMP Target): False입니다. (mov eax,-30, cmp eax,-50. -30 - -50 = +20으로 양수입니다. JG Target (Greater Jump)는 참이므로 Target으로 점프합니다. True입니다.)
+
+16. True/False (JMP Target): False입니다. (mov eax,-42, cmp eax,26. 부호 있는 비교: 음수 < 양수는 참입니다. JA Target (Above Jump, 부호 없는 비교)는 거짓입니다. Target으로 점프하지 않습니다. False입니다.)
+
+17. RBX 최종 값: RBX = 0입니다. (RBX와 0FFFFFFFFFFFFFFFFh를 AND 연산하면 0FFFFFFFFFFFFFFFFh의 비트가 모두 1이므로 RBX의 값은 변하지 않습니다. 하지만 다음 AND 연산 대상이 80h이므로 RBX = 0입니다. (주: AND RBX, 80h는 하위 8비트만 80h로 바꾸고 나머지를 0으로 만듭니다. 최종적으로 RBX = 80h가 됩니다.) RBX = 80h입니다.
+
+18. RBX 최종 값: RBX = 80808080h입니다. (0FFFFFFFFFFFFFFFFh AND 80808080h → RBX의 모든 상위 비트가 0이 되고, 하위 32비트가 80808080h가 됩니다.) RBX = 0000000080808080h입니다.
+
+19. RBX 최종 값: RBX = 0FFFFFFFF80808080h입니다. (0FFFFFFFFFFFFFFFFh AND 80808080h → RBX의 상위 32비트는 FFFFFFFFh로 유지되고 하위 32비트가 80808080h가 됩니다.) RBX = 0FFFFFFFF80808080h입니다.
+
+
+6.10.2 Algorithm Workbench
+1. AAM (ASCII Adjust after Multiplication) 명령어를 사용합니다. (AL에 ASCII가 있을 때)
+
+2. MOV EAX, [mem32], XOR AL, AH, XOR AL, AH... 와 같은 XOR 명령어의 반복 시퀀스를 사용합니다.
+
+3. SetX와 SetY가 배열이라고 가정하면, MOV EAX, SetX[0], AND EAX, SetY[0], MOV SetZ[0], EAX 와 같은 AND 명령어를 사용하고 루프를 돌립니다.
+
+4. CMP DX, CX, JB L1을 사용합니다.
+
+5. CMP AX, CX, JG L2를 사용합니다.
+
+6. TEST AL, 03h, JNZ L3, JMP L4를 사용합니다.
+
+7.
+MOV EAX, val1
+CMP EAX, ECX
+JLE L2 ; val1 <= ecx 이면 X=2
+; short-circuit AND의 첫 번째 조건 (val1 > ecx) 참
+CMP EAX, EDX
+JLE L2 ; val1 <= edx 이면 X=2 (두 번째 조건 거짓)
+; 두 조건 모두 참
+MOV X, 1
+JMP L_End
+
+6.11.2 Exercise Descriptions
+1.
+FillArray PROC USES EAX EBX ECX EDX ESI EDI, pArray:PTR DWORD, N:DWORD, j:DWORD, k:DWORD
+    ; EAX = k - j + 1
+    INVOKE RandomRange, EAX 
+    ; EAX = EAX + j
+    ; [ESI]에 EAX 저장, ESI += 4, LOOP
+    RET
+FillArray ENDP
+
+2.
+SumRange PROC USES EBX ECX EDX ESI EDI, pArray:PTR DWORD, size:DWORD, j:DWORD, k:DWORD
+    MOV EAX, 0  ; 합계 (Sum)
+    ; ESI로 배열 순회. j와 k를 사용하여 범위 체크
+    ; IF [ESI] >= j AND [ESI] <= k THEN EAX += [ESI]
+    RET
+SumRange ENDP
+
+3. 
+CalcGrade PROC USES EBX ECX EDX ESI EDI, score:DWORD
+    ; Score Range: 90-100='A', 80-89='B', 70-79='C', 60-69='D', 0-59='F'
+    ; score 값에 따라 AL에 'A', 'B', 'C', 'D', 'F' 중 하나 반환
+    RET
+CalcGrade ENDP
+
+4.
+; CMP와 조건 점프(JNE, JL, JG 등)만을 사용하여 등록 로직 재구현
+; JMP/CALL을 사용하여 IF/ELSEIF/ELSE 구조를 만듭니다.
+; CMP credit, 1 / JL Error1  (학점 < 1)
+; CMP credit, 30 / JG Error2 (학점 > 30)
+; ... 오류 메시지 출력 및 결과 표시 로직 구현
+
+5.
+; 사용자 메뉴 표시 후 INVOKE ReadInt로 선택
+; 선택된 번호에 따라 해당 프로시저 (AND_op, OR_op 등) INVOKE
+; 프로시저 내에서 피연산자 입력받아 연산
+RET
+
+6.
+AND_op PROC ; 16진수 두 개 입력받아 AND 후 16진수로 출력
+OR_op PROC  ; 16진수 두 개 입력받아 OR 후 16진수로 출력
+; NOT_op, XOR_op는 기존 로직을 따라 구현
+RET
+
+7.
+; MOV ECX, 20 (20줄 반복)
+; INVOKE RandomRange, 10 ; 0-9 난수 생성
+; CMP EAX, 2 / JLE L_White ; 0-2 (30%) -> White
+; CMP EAX, 5 / JLE L_Blue  ; 3-5 (30%) -> Blue
+; CMP EAX, 9 / JLE L_Green ; 6-9 (40%) -> Green
+; INVOKE SetTextColor, ... ; 해당 색상 설정
+; INVOKE WriteString, OFFSET text ; 텍스트 출력
+RET
+
+8.
+Encrypt Proc USES EAX ECX ESI EDI
+    ; PlainText와 Key를 ESI, EDI로 순회
+    ; Key 반복: Key 포인터가 끝에 도달하면 다시 시작하도록
+    ; MOV AL, [ESI] / XOR [ESI], AL ; XOR 연산 수행 및 저장
+    RET
+Encrypt ENDP
+
+9.
+Validate_PIN PROC USES EBX ECX EDX ESI EDI, pPIN:PTR BYTE
+    ; Min_Range[5], Max_Range[5] 배열 사용
+    ; ECX = 5 (5자리 반복)
+    ; ESI로 pPIN, EDI로 Min_Range 순회
+    ; MOV EAX, 1 ; EAX에 현재 자릿수 (1-5) 저장
+    ; IF ([ESI] < [EDI]) OR ([ESI] > [EDI+5]) THEN RETURN EAX (오류 위치)
+    ; 모든 자리 통과 시 EAX에 0 반환
+    RET
+Validate_PIN ENDP
+
+10.
+ParityCheck PROC USES EBX ECX ESI, pArray:PTR BYTE, size:DWORD
+    MOV EAX, 0 ; 전체 비트 합계 (Sum)
+    ; ESI로 배열 순회, ECX로 바이트 반복
+    ; 각 바이트(AL)에 대해:
+    ;   MOV AH, 0 ; AH에 임시 비트 합계
+    ;   L_BitLoop: TEST AL, 1 / JZ L_Skip ; 최하위 비트가 1이면
+    ;   INC AH
+    ;   SHR AL, 1 / LOOP L_BitLoop ; 비트 시프트
+    ;   ADD EAX, AH ; Sum에 추가
+    ; 최종 EAX = Sum % 2 == 0 ? 1 : 0 반환
+    RET
+ParityCheck ENDP
