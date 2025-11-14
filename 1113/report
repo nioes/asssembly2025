@@ -1,1 +1,222 @@
+***7.9.1 Review Questions and Exercises***
 
+1. AL 값 변화 (초기값 0D4Ⅱ) A4H, EAH, FDH, A9H
+
+2. AL 값 변화 (초기값 0D4H) 9AH, A8H, A9H, 7AH
+
+3. mul cx 후 AX, DX 내용 AX: 2200H, DX: 0002H
+
+4. div bl 후 AX 내용 AX: 0306H
+
+5. div ebx 후 EAX, EDX 내용 EAX: 00012340H, EDX: 00000000H
+
+6. div bx 후 AX, DX 내용 AX: 0400H, DX: 0000H
+
+7. 명령어 실행 후 BX 내용 BX: 0066H
+
+8. 64비트 모드에서 출력 (RDX : R.AX) 값 RDX: 0000000000000108H, RAX: 0000000033300020H
+
+9. 논리 오류 수정 (핵심 명령어)
+mov rcx, 8 (또는 mov cx, 8) -> sbb BYTE PTR [esi], BYTE PTR [edi]
+
+10. 64비트 모드에서 RAX의 16진수 내용 RAX: 0004080C10140000H
+
+***7.9.2 Algorithm Workbench***
+1. SHL EAX, 16 SAR EAX, 16
+
+2. SHR AL, 1 JNC NEXT OR AL, 80H NEXT:
+
+3. SHL EAX, 4
+
+4. SHR EBX, 2
+
+5. ROL DL, 4 또는 ROR DL, 4
+
+6. SHLD AX, DX, 1
+
+7. CLC RCR BYTEARRAY+2, 1 RCR BYTEARRAY+1, 1 RCR BYTEARRAY, 1
+
+8. CLC RCL WORDARRAY, 1 RCL WORDARRAY+2, 1 RCL WORDARRAY+4, 1
+
+9. MOV AX, -5 IDIV 3 MOV VAL1, AL
+
+10. MOV AX, -276 IDIV 10 MOV VAL1, AL
+
+11. MOV EAX, VAL2 MUL VAL3 MOV EBX, VAL4 SUB EBX, 3 DIV EBX MOV VAL1, EAX
+
+12. MOV EAX, VAL2 CDQ IDIV VAL3 MOV EBX, EAX MOV ECX, VAL1 ADD ECX, VAL2 IMUL ECX
+MOV VAL1, EAX
+
+13. 프로시저의 핵심 명령어: MOV AH, O MOV BL, 10 DIV BL (나눗셈 후 WriteChar 호출 반복)
+
+14. 최종 AX 값: 0108H
+
+15. MOV EAX, N MOV EBX, Y - 1 AND EAX, EBX
+
+16. MOV EDX, EAX SAR EDX, 31 XOR EAX, EDX SUB EAX, EDX
+
+***7.10 Programming Exercises***
+1.
+// 팩트 10진수 배열(decimal_one)을 ASCII로 변환 후 소수점 찍어 출력
+PROCEDURE WriteScaled(offset, length, decimal_offset) {
+    FOR i = 0 TO length - 1 {
+        // 소수점 위치: 오른쪽에서 decimal_offset 위치
+        IF (i == length - decimal_offset) {
+            PRINT('.');
+        }
+        
+        // 팩트 10진수 바이트를 두 개의 ASCII 숫자로 디코딩
+        byte = decimal_one[i];
+        
+        // 상위 4비트 (십의 자리)
+        high_nibble = (byte >> 4) AND 0xF;
+        PRINT(high_nibble + '0'); // '0'의 ASCII 값(30h) 더하기
+        
+        // 하위 4비트 (일의 자리)
+        low_nibble = byte AND 0xF;
+        PRINT(low_nibble + '0');
+    }
+}
+2.
+// 임의 길이의 두 정수 뺄셈 (n은 32비트 단위 개수)
+PROCEDURE Extended_Sub(A, B, Result, n) {
+    Carry = 0; // 어셈블리에서는 CF(Carry Flag)를 사용
+    
+    FOR i = 0 TO n - 1 {
+        // 32비트 워드 단위로 뺄셈
+        // 어셈블리 명령어: SUB (첫 번째 워드) 후 SBB (나머지 워드)
+        Result[i] = A[i] - B[i] - Carry; 
+        
+        // 빌림(Borrow) 발생 여부 갱신 (CF를 확인)
+        IF (Borrow_Occurred) { 
+            Carry = 1; 
+        } ELSE {
+            Carry = 0;
+        }
+    }
+}
+3.
+// 4바이트 팩트 10진수를 ASCII 문자열로 변환 (8자리 + 부호/NULL)
+PROCEDURE PackedToAsc(PackedNum, AsciiBuffer) {
+    index = 0;
+    
+    // 팩트 10진수의 각 바이트를 순회
+    FOR i = 0 TO 3 {
+        byte = PackedNum[i];
+        
+        // 상위 4비트 (10진수)
+        high = (byte >> 4) AND 0xF;
+        AsciiBuffer[index++] = high + '0';
+        
+        // 하위 4비트 (10진수, 마지막 바이트는 부호 포함)
+        low = byte AND 0xF;
+        
+        IF (i < 3) {
+            AsciiBuffer[index++] = low + '0';
+        } ELSE {
+            // 마지막 바이트의 하위 4비트는 부호 (여기서는 간단히 숫자만 변환)
+            // 실제 구현에서는 부호를 확인해서 '+' 또는 '-'를 출력해야 함
+            // AsciiBuffer[index++] = low + '0'; // 부호 비트는 생략하고 8자리만 변환
+        }
+    }
+    AsciiBuffer[index] = 0; // NULL 종료 문자
+}
+4.
+// 평문 10바이트를 키 배열에 따라 회전 암호화
+PROCEDURE Encrypt(Message, Key) {
+    FOR i = 0 TO 9 { // 메시지의 첫 10바이트
+        rotation_amount = Key[i]; // 키 배열 사용
+        
+        IF (rotation_amount > 0) {
+            // 양수: 오른쪽 회전 (ROR)
+            Message[i] = RotateRight(Message[i], rotation_amount);
+        } ELSE IF (rotation_amount < 0) {
+            // 음수: 왼쪽 회전 (ROL)
+            Message[i] = RotateLeft(Message[i], ABS(rotation_amount));
+        }
+    }
+}
+5.
+// 에라토스테네스의 체: 2부터 1000까지의 소수 찾기
+PROCEDURE SieveOfEratosthenes(Max) {
+    // 1001개의 불리언 배열 (0~1000)
+    is_prime[1001] = {TRUE, TRUE, ...}; 
+    is_prime[0] = is_prime[1] = FALSE;
+    
+    FOR p = 2 TO SQRT(Max) {
+        IF (is_prime[p] == TRUE) {
+            // p의 배수들을 제거 (합성수로 표시)
+            FOR i = p * p TO Max STEP p {
+                is_prime[i] = FALSE;
+            }
+        }
+    }
+    
+    // 최종 소수 출력
+    FOR p = 2 TO Max {
+        IF (is_prime[p] == TRUE) {
+            PRINT(p);
+        }
+    }
+}
+6.
+// 유클리드 호제법 (어셈블리 DIV 명령어 사용)
+FUNCTION GCD(x, y) {
+    x = ABS(x); 
+    y = ABS(y);
+    
+    WHILE (y > 0) {
+        n = x MOD y; // 어셈블리에서는 DIV 명령 후 남은 레지스터(DX)가 나머지
+        x = y;
+        y = n;
+    }
+    RETURN x;
+}
+7.
+// 쉬프트와 덧셈만 사용한 32비트 곱셈 (Product <= 32비트 가정)
+FUNCTION BitwiseMultiply(Multiplicand, Multiplier) {
+    Product = 0;
+    
+    FOR i = 0 TO 31 {
+        // Multiplier의 최하위 비트가 1인지 확인 (어셈블리에서는 CF 확인)
+        IF (Multiplier AND 1) { 
+            Product = Product + Multiplicand;
+        }
+        
+        // Multiplicand는 왼쪽 쉬프트 (SHL)
+        Multiplicand = Multiplicand SHIFT LEFT 1;
+        // Multiplier는 오른쪽 쉬프트 (SHR)
+        Multiplier = Multiplier SHIFT RIGHT 1;
+    }
+    
+    RETURN Product; // EAX에 반환
+}
+8.
+// 임의 길이 팩트 10진수 덧셈 (ECX = 바이트 수)
+PROCEDURE AddPacked(ESI_ptr, EDI_ptr, EDX_ptr, ECX_count) {
+    // 최하위 바이트부터 시작하기 위해 포인터를 끝으로 이동
+    // 예: ESI_ptr = ESI_ptr + ECX_count - 1
+    
+    Carry = 0; // 어셈블리에서는 CF(Carry Flag)를 사용
+    
+    FOR i = 0 TO ECX_count - 1 {
+        // 현재 바이트 위치
+        byte_index = ECX_count - 1 - i;
+        
+        // 팩트 10진수 덧셈 (BCD 덧셈)
+        // 어셈블리 명령어: ADC (Add with Carry) 후 DAA (Decimal Adjust for Addition)
+        SumByte = ESI_ptr[byte_index] + EDI_ptr[byte_index] + Carry;
+        
+        // 10진수 조정 (DAA)을 통해 10진수 덧셈의 올림을 처리
+        // SumByte = DecimalAdjust(SumByte); 
+        
+        EDX_ptr[byte_index] = SumByte;
+        
+        // 새로운 캐리 갱신 (CF를 확인)
+        IF (New_Carry_Occurred) {
+            Carry = 1;
+        } ELSE {
+            Carry = 0;
+        }
+    }
+}
