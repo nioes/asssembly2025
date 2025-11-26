@@ -1,1 +1,325 @@
+8.10.1 Short Answer
 
+1. RET (또는 RET n)
+
+2. EAX
+
+3. Callee (호출된 프로시저)
+
+4. 런타임에 유효 주소를 계산할 수 있음
+
+5. 4 bytes
+
+6. 가변 인자 리스트 (Variable Argument Lists) 구현 가능
+
+7. False
+
+8. True
+
+9. True
+
+8.10.2 Algorithm Workbench
+1.
+-----------------
+      10h
+-----------------
+      20h
+-----------------
+      30h         < [EBP + 8]
+-----------------
+   Return Addr    < [EBP + 4]
+-----------------
+   Saved EBP      < [EBP]
+-----------------
+
+2.
+AddThree PROC, val1:DWORD, val2:DWORD, val3:DWORD
+    mov eax, val1
+    add eax, val2
+    add eax, val3
+    ret
+AddThree ENDP
+
+3. LOCAL pArray:PTR DWORD
+
+4. LOCAL buffer[20]:BYTE
+
+5. LOCAL pwArray:PTR WORD
+
+6. LOCAL myByte:SBYTE
+
+7. LOCAL myArray[20]:DWORD
+
+8. 
+SetColor PROC, forecolor:DWORD, backcolor:DWORD
+    mov eax, backcolor
+    shl eax, 4
+    add eax, forecolor
+    call SetTextColor
+    ret
+SetColor ENDP
+
+9.
+WriteColorChar PROC, char:BYTE, forecolor:DWORD, backcolor:DWORD
+    invoke SetColor, forecolor, backcolor
+    mov al, char
+    call WriteChar
+    ret
+WriteColorChar ENDP
+
+10.
+DumpMemory PROC USES esi ebx, address:DWORD, count:DWORD, unitType:DWORD
+    invoke DumpMem, address, count, unitType
+    ret
+DumpMemory ENDP
+
+11.
+MultArray PROTO, ptr1:PTR DWORD, ptr2:PTR DWORD, count:DWORD
+
+MultArray PROC, ptr1:PTR DWORD, ptr2:PTR DWORD, count:DWORD
+    ret
+MultArray ENDP
+
+8.11 Programming Exercises
+1.
+FindLargest PROTO, ptrArray:PTR SDWORD, count:DWORD
+
+.code
+FindLargest PROC USES esi ecx edx, ptrArray:PTR SDWORD, count:DWORD
+    mov esi, ptrArray
+    mov ecx, count
+    dec ecx
+    mov eax, [esi]      ; 첫 번째 값을 최대로 가정
+    add esi, 4
+L1:
+    mov edx, [esi]
+    cmp edx, eax
+    jle NextVal
+    mov eax, edx        ; 새로운 최대값 갱신
+NextVal:
+    add esi, 4
+    loop L1
+    ret
+FindLargest ENDP
+
+2.
+DrawChessBoard PROC USES ecx eax edx
+    mov ecx, 8          ; 행 반복
+    mov dh, 0           ; Y 좌표
+RowLoop:
+    push ecx
+    mov ecx, 8          ; 열 반복
+    mov dl, 0           ; X 좌표
+ColLoop:
+    call Gotoxy
+    
+    ; (row + col) % 2 계산
+    mov al, dh
+    add al, dl
+    test al, 1
+    jnz IsOdd
+    mov eax, gray + (white * 16) ; 짝수 합: 회색 배경
+    jmp SetColor
+IsOdd:
+    mov eax, white + (gray * 16) ; 홀수 합: 흰색 배경
+SetColor:
+    call SetTextColor
+    mov al, ' '
+    call WriteChar
+    inc dl
+    loop ColLoop
+    
+    inc dh
+    pop ecx
+    loop RowLoop
+    
+    ; 색상 복구
+    mov eax, lightGray + (black * 16)
+    call SetTextColor
+    ret
+DrawChessBoard ENDP
+
+3.
+.data
+colorIndex DWORD 0
+
+.code
+; 메인 루프 예시
+mov ecx, 16
+L1:
+    mov eax, colorIndex
+    call DrawColorBoard ; 2번 코드를 변형하여 색상 인자를 받도록 수정 필요
+    mov eax, 500
+    call Delay
+    inc colorIndex
+    and colorIndex, 0Fh ; 15(Fh)를 넘으면 0으로
+    loop L1
+
+4.
+FindThrees PROTO, ptrArray:PTR DWORD, count:DWORD
+
+.code
+FindThrees PROC USES esi ecx, ptrArray:PTR DWORD, count:DWORD
+    mov esi, ptrArray
+    mov ecx, count
+    sub ecx, 2          ; 최소 3개는 있어야 하므로
+    jb NotFound
+L1:
+    mov eax, [esi]
+    cmp eax, 3
+    jne Next
+    mov eax, [esi+4]
+    cmp eax, 3
+    jne Next
+    mov eax, [esi+8]
+    cmp eax, 3
+    jne Next
+    
+    mov eax, 1          ; 찾음
+    jmp Quit
+Next:
+    add esi, 4
+    loop L1
+
+NotFound:
+    mov eax, 0
+Quit:
+    ret
+FindThrees ENDP
+
+5.
+DifferentInputs PROTO, v1:DWORD, v2:DWORD, v3:DWORD
+
+.code
+DifferentInputs PROC, v1:DWORD, v2:DWORD, v3:DWORD
+    mov eax, v1
+    cmp eax, v2
+    je FalseRet
+    cmp eax, v3
+    je FalseRet
+    mov eax, v2
+    cmp eax, v3
+    je FalseRet
+    
+    mov eax, 1
+    ret
+FalseRet:
+    mov eax, 0
+    ret
+DifferentInputs ENDP
+
+6.
+; Swap 프로시저가 있다고 가정 (Irvine32 또는 이전 섹션)
+.code
+    ; 메인 루프 부분
+    mov ecx, LENGTHOF myArray
+    shr ecx, 1          ; 길이 / 2 만큼 반복
+    mov esi, OFFSET myArray
+L1:
+    INVOKE Swap, esi, ADDR [esi+4] ; 4바이트 정수 기준 연속된 쌍 교환
+    add esi, 8
+    loop L1
+
+7.
+GCD PROTO, int1:DWORD, int2:DWORD
+
+.code
+GCD PROC, int1:DWORD, int2:DWORD
+    mov eax, int1
+    mov ebx, int2
+    cmp ebx, 0
+    je Done             ; b가 0이면 a(EAX)가 GCD
+    
+    mov edx, 0
+    div ebx             ; EDX = EAX % EBX
+    INVOKE GCD, ebx, edx
+Done:
+    ret
+GCD ENDP
+
+8.
+CountMatches PROTO, p1:PTR SDWORD, p2:PTR SDWORD, len:DWORD
+
+.code
+CountMatches PROC USES esi edi ecx edx, p1:PTR SDWORD, p2:PTR SDWORD, len:DWORD
+    mov esi, p1
+    mov edi, p2
+    mov ecx, len
+    mov eax, 0          ; 카운트 초기화
+L1:
+    mov edx, [esi]
+    cmp edx, [edi]
+    jne Skip
+    inc eax
+Skip:
+    add esi, 4
+    add edi, 4
+    loop L1
+    ret
+CountMatches ENDP
+
+9.
+CountNearMatches PROTO, p1:PTR SDWORD, p2:PTR SDWORD, len:DWORD, diff:DWORD
+
+.code
+CountNearMatches PROC USES esi edi ecx edx, p1:PTR SDWORD, p2:PTR SDWORD, len:DWORD, diff:DWORD
+    mov esi, p1
+    mov edi, p2
+    mov ecx, len
+    mov eax, 0          ; 카운트
+L1:
+    mov edx, [esi]
+    sub edx, [edi]      ; 차이 계산
+    jns Pos             ; 양수면 점프
+    neg edx             ; 음수면 절대값으로
+Pos:
+    cmp edx, diff
+    jg Skip             ; 차이가 diff보다 크면 건너뜀
+    inc eax
+Skip:
+    add esi, 4
+    add edi, 4
+    loop L1
+    ret
+CountNearMatches ENDP
+
+10.
+ShowParams PROTO, paramCount:DWORD
+
+.code
+ShowParams PROC USES esi ecx ebx, paramCount:DWORD
+    ; 현재 EBP -> Saved EBP (호출자 MySample의 EBP) -> 호출자의 매개변수
+    mov ebx, [ebp]      ; EBX = MySample의 EBP
+    mov ecx, paramCount
+    mov esi, 8          ; [EBP+8]부터 첫 번째 매개변수
+    
+    ; 형식 출력 (생략 가능하지만 문제 요구사항)
+    mov edx, OFFSET strHeader ; "Stack parameters:" 등
+    call WriteString
+    call Crlf
+
+L1:
+    ; 주소 출력
+    mov eax, ebx
+    add eax, esi
+    mov edx, OFFSET strAddress ; "Address "
+    call WriteString
+    call WriteHex       ; 주소 값 출력
+    
+    ; 값 출력
+    mov edx, OFFSET strEquals ; " = "
+    call WriteString
+    mov eax, [ebx + esi] ; 해당 주소에 있는 값
+    call WriteHex
+    call Crlf
+    
+    add esi, 4
+    loop L1
+    ret
+ShowParams ENDP
+
+; 호출 예시 (MySample 내부)
+; MySample PROC first:DWORD, second:DWORD, third:DWORD
+; INVOKE ShowParams, 3
+; ret
+; MySample ENDP
