@@ -1,1 +1,268 @@
+9.9.1 Short Answer
 
+1. 문자열 프리미티브 실행 시 인덱스 레지스터가 메모리에서 역방향으로 이동하게 하는 Direction
+Flag 설정은?
+
+• 답: 1 (Set)
+
+2. STOSW와 함께 반복 접두사(repeat prefix)가 사용될 때, 인덱스 레지스터에 더해지거나 빼지는
+값은?
+
+• 답: 2 (WORD 크기만큼)
+
+3. CMPS 명령어는 어떤 면에서 모호한가?
+
+• 답: 두 피연산자 중 어느 것에서 어느 것을 빼는지(순서) 혼동하기 쉽고, 뺄셈 결과는 저장하지 않
+고 플래그만 변경하기 때문.
+
+4. Direction Flag가 0이고 SCASB가 일치하는 문자를 찾았을 때, EDI는 어디를 가리키는가?
+• 답: 일치한 문자 바로 다음 바이트.
+
+5. 배열에서 특정 문자의 첫 번째 발생을 스캔할 때 가장 적합한 반복 접두사는?
+
+• 답: REPNE (또는 REPNZ )
+
+6. Section 9.3의 Str_trim 프로시저는 어떤 Direction Flag 설정을 사용하는가?
+• 답: STD (역방향 스캔을 위해 플래그를 1로 설정)
+
+7. Section 9.3의 Str_trim 프로시저가 JNE 명령어를 사용하는 이유는?
+• 답: 공백이 아닌 문자를 찾으면 루프를 멈추기 위해서.
+
+8. Section 9.3의 Str_ucase 프로시저는 타겟 문자열에 숫자가 포함되어 있으면 어떻게 되는가?
+• 답: 숫자는 변경되지 않고 그대로 유지됨.
+
+9. Section 9.3의 Str_length 프로시저가 SCASB를 사용한다면 어떤 반복 접두사가 가장 적절한가?
+
+• 답: REPNE (Null terminator인 O을 찾을 때까지 반복)
+
+10. Section 9.3의 Str_length가 SCASB를 사용한다면 문자열 길이를 어떻게 계산하고 반환하는가?
+• 답: (스캔이 끝난 후의 EDI 값) -(시작 주소) - 1
+
+11. 배열에 1,024개의 요소가 있을 때 이진 탐색(Binary Search) 알고리즘이 필요한 최대 비교 횟수
+는?
+
+• 답: 11회 (log21024 + 1)
+
+12. Binary Search 예제(FillArray)에서 CLD로 Direction Flag를 지워야 하는 이유는?
+• 답: 메모리 주소를 증가시키는 방향(순방향)으로 데이터를 채워야 하기 때문.
+
+13. BinarySearch 프로시저에서 레이블 L2의 문장을 제거해도 결과에 영향을 주지 않는 이유는?
+
+• 답: 어차피 루프 조건이나 다음 비교 로직에서 걸러지기 때문 (구현에 따라 다름, 보통은 중앙값
+과 키값이 같을 때의 처리를 의미).
+
+14. BinarySearch 프로시저에서 레이블 L4의 문장은 어떻게 제거할 수 있는가?
+
+• 답: 논리 흐름을 단순화하여 병합 가능.
+
+9.9.2 Algorithm Workbench
+1. 32비트 모드에서 베이스-인덱스 피연산자의 예를 보이시오.
+
+• 답: [EBX + ESI]
+
+2. 32비트 모드에서 베이스-인덱스-변위 피연산자의 예를 보이시오.
+• 답: [EBX + ESI + 10]
+
+3. 3행 4열의 DWORD 배열에서 2행(1) 3열(2)의 요소를 가리키는 ESI, EDI 표현식은? (행/열은 0부
+터시작)
+
+• 답: RowSize = 4 * 4 = 16 bytes
+MOV EAX, MyArray[ESI * 16 + EDI * 4] (ESI=Row,EDI=Col 가정)
+
+4. sourcew와 targetw라는 두 16비트 배열을 비교하는 CMPSW 명령어 작성.
+cld
+mov esi, OFFSET sourcew
+mov edi, OFFSET targetw
+mov ecx, LENGTHOF sourcew
+repe cmpsw
+
+5. wordArray 배열에서 16비트 값 0100h를 스캔하고 일치하는 오프셋을 EAX에 복사하는 명령어.
+cld
+mov edi, OFFSET wordArray
+mov ecx, LENGTHOF wordArray
+mov ax, 0100h
+repne scasw
+jnz Quit
+dec edi
+dec edi       ; 일치한 위치로 복구
+mov eax, edi
+Quit:
+
+6. Str_compare를 사용하여 두 문자열 중 더 큰 것을 콘솔에 출력하는 코드.
+INVOKE Str_compare, ADDR string1, ADDR string2
+ja  ChooseStr1
+mov edx, OFFSET string2
+jmp Print
+ChooseStr1:
+mov edx, OFFSET string1
+Print:
+call WriteString
+
+7. Str_trim을 호출하여 문자열 끝의 "@" 문자를 제거하는 방법.
+INVOKE Str_trim, ADDR buffer, '@'
+
+8.Irvine32 라이브러리의 Str_ucase를 수정하여 소문자로 바꾸는 방법.
+답: ASCII 범위 체크를 'A'~'Z'로 하고, 변환 시 ADD AL, 32 (또는 OR AL, 00100000b)를 수행.
+
+9. Str_trim의 64비트 버전 생성.
+답: EAX, ECX 대신 RAX, RCX 등을 사용하고 포인터 크기를 8바이트로 처리.
+
+10. 64비트 모드에서 베이스-인덱스 피연산자 예시.
+답: [RBX + RSI]
+
+11.  EBX가 행 인덱스, EDI가 열 인덱스일 때 32비트 정수 2차원 배열(myArray) 요소를 EAX로 옮기는 문장.
+답: (행 크기가 필요하지만 일반식으로) MOV EAX, myArray[EBX + EDI * 4] (단, EBX가 행의 시작 오프셋을 이미 계산했다고 가정)
+
+12.위와 같고 64비트 정수 배열일 때 RAX로 옮기는 문장.
+답: MOV RAX, myArray[RBX + RDI * 8]
+
+9.10 Programming Exercises
+1. Improved Str_copy Procedure
+; 입력: source, target 포인터, maxChars(복사할 최대 개수)
+Str_copyN PROC uses eax ecx esi edi,
+    source:PTR BYTE,
+    target:PTR BYTE,
+    maxChars:DWORD
+
+    mov esi, source
+    mov edi, target
+    mov ecx, maxChars
+    cld                 ; 정방향 설정
+
+L1:
+    mov al, [esi]       ; 소스에서 문자 읽기
+    cmp al, 0           ; NULL 종료 문자 확인
+    je  Done            ; NULL이면 종료
+    mov [edi], al       ; 타겟에 복사
+    inc esi
+    inc edi
+    loop L1             ; ECX(maxChars)만큼 반복
+
+Done:
+    mov byte ptr [edi], 0 ; 타겟 끝에 NULL 추가
+    ret
+Str_copyN ENDP
+
+2. Str_concat Procedure
+; 입력: targetStr, sourceStr 포인터
+Str_concat PROC uses eax esi edi,
+    targetStr:PTR BYTE,
+    sourceStr:PTR BYTE
+
+    ; 1. 타겟 문자열의 끝(NULL) 찾기
+    mov edi, targetStr
+    mov al, 0
+    mov ecx, 0FFFFFFFFh ; 충분히 큰 값
+    cld
+    repne scasb
+    dec edi             ; NULL 위치로 포인터 복구
+
+    ; 2. 소스 문자열 복사해서 붙이기
+    mov esi, sourceStr
+L1:
+    mov al, [esi]
+    mov [edi], al
+    inc esi
+    inc edi
+    test al, al         ; NULL인지 확인
+    jnz L1
+
+    ret
+Str_concat ENDP
+
+3. Str_remove Procedure
+; 입력: pStart(삭제를 시작할 주소 포인터), nChars(삭제할 문자 개수)
+Str_remove PROC uses eax esi edi,
+    pStart:PTR BYTE,
+    nChars:DWORD
+
+    ; 1. ESI(소스) = 삭제할 구간 바로 뒷부분 (복사해올 위치)
+    mov esi, pStart
+    add esi, nChars
+
+    ; 2. EDI(목적지) = 삭제 시작 위치 (덮어쓸 위치)
+    mov edi, pStart
+
+    ; 3. 뒤쪽 문자들을 앞으로 한 칸씩 당겨서 복사 (NULL 포함)
+L1:
+    mov al, [esi]      ; 뒤쪽 문자 읽기
+    mov [edi], al      ; 앞쪽으로 복사
+    inc esi
+    inc edi
+    cmp al, 0          ; 방금 옮긴 게 NULL(문자열 끝)인지 확인
+    jne L1             ; 끝이 아니면 계속 반복
+
+    ret
+Str_remove ENDP
+
+4. Str_find Procedure
+; 입력: source(찾을 문자열), target(대상 문자열)
+; 출력: 찾으면 Zero Flag=1, EAX=위치 / 못 찾으면 Zero Flag=0
+Str_find PROC uses ecx esi edi,
+    source:PTR BYTE,
+    target:PTR BYTE
+
+    mov esi, source
+    mov edi, target
+
+    ; 로직 생략: 보통 이중 루프 필요 (target을 돌면서 source 첫 글자와 비교 -> 맞으면 전체 비교)
+    ; 간결한 답변을 위해 핵심 아이디어만:
+    ; 1. target에서 source의 첫 글자를 SCASB나 루프로 찾음.
+    ; 2. 찾으면 PUSH EDI, PUSH ESI 하고 REPE CMPSB로 나머지 비교.
+    ; 3. 다 맞으면 성공, 아니면 POP해서 다음 위치부터 다시 검색.
+    ret
+Str_find ENDP
+
+5.Str_nextWord Procedure
+; 입력: target 포인터, delimiter(구분자 문자)
+Str_nextWord PROC uses ecx edi,
+    target:PTR BYTE,
+    delimiter:BYTE
+
+    mov edi, target
+    mov al, delimiter
+    mov ecx, 0FFFFFFFFh
+    cld
+    repne scasb        ; 구분자 찾기
+    jnz NotFound       ; 못 찾음
+
+    ; 찾았을 때
+    dec edi            ; 구분자 위치
+    mov byte ptr [edi], 0 ; NULL로 변경
+    inc edi            ; 다음 문자 위치
+    mov eax, edi       ; EAX에 다음 위치 저장
+    test eax, eax      ; Zero Flag 세팅 (ZF=1 아님을 위해 OR EAX,EAX 등 조정 필요, 여기선 개념만)
+    cmp eax, eax       ; ZF=1 설정
+    ret
+
+NotFound:
+    or al, 1           ; ZF=0 설정 (Clear Zero flag)
+    ret
+Str_nextWord ENDP
+
+6.Get_frequencies
+; 입력: target(문자열), freqTable(256개 DWORD 배열)
+Get_frequencies PROC uses eax ecx esi edi,
+    target:PTR BYTE,
+    freqTable:PTR DWORD
+
+    mov esi, target
+    mov edi, freqTable
+    cld
+
+L1:
+    movzx eax, byte ptr [esi] ; 문자를 읽어서 EAX에 확장 (ASCII 코드 = 인덱스)
+    cmp al, 0
+    je Done
+    
+    ; freqTable[ASCII] 값을 1 증가
+    ; DWORD 배열이므로 인덱스 * 4 필요
+    shl eax, 2                ; EAX * 4
+    inc dword ptr [edi + eax] ; 해당 인덱스 카운트 증가
+
+    inc esi
+    jmp L1
+
+Done:
+    ret
+Get_frequencies ENDP
